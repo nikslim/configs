@@ -3,7 +3,7 @@ set nocompatible
 filetype off
 
 "--------------------------------------
-" Languages plugins
+" Plugin groups
 "--------------------------------------
 
 let SYNTASTIC_PLUGIN = 0
@@ -14,52 +14,60 @@ let PERL_PLUGINS = 0
 " Install NeoBundle if it is not exists
 "--------------------------------------
 
-let firstRun = 0
-let neobundle_file = expand($HOME.'/.vim/bundle/neobundle.vim/README.md')
-if !filereadable(neobundle_file)
-    echo "Installing NeoBundle.."
-    echo ""
-    silent !mkdir -p $HOME/.vim/bundle
-    silent !git clone https://github.com/Shougo/neobundle.vim $HOME/.vim/bundle/neobundle.vim
-    let firstRun = 1
+let ALLOW_PLUGINS = 1
+if !executable('git')
+    let ALLOW_PLUGINS = 0
 endif
 
-"--------------------------------------
-" NeoBundle configuration
-"--------------------------------------
-if has('vim_starting')
-    set runtimepath+=$HOME/.vim/bundle/neobundle.vim/
-endif
+if ALLOW_PLUGINS == 1
+    let firstRun = 0
+    let neobundle_file = expand($HOME.'/.vim/bundle/neobundle.vim/README.md')
+    if !filereadable(neobundle_file)
+        echo "Installing NeoBundle.."
+        echo ""
+        silent !mkdir -p $HOME/.vim/bundle
+        silent !git clone https://github.com/Shougo/neobundle.vim $HOME/.vim/bundle/neobundle.vim
+        let firstRun = 1
+    endif
 
-call neobundle#begin(expand($HOME.'/.vim/bundle'))
+    "--------------------------------------
+    " NeoBundle configuration
+    "--------------------------------------
+    if has('vim_starting')
+        set runtimepath+=$HOME/.vim/bundle/neobundle.vim/
+    endif
 
-NeoBundleFetch 'Shougo/neobundle.vim'
+    call neobundle#begin(expand($HOME.'/.vim/bundle'))
 
-"list plugins
+    NeoBundleFetch 'Shougo/neobundle.vim'
 
-if SYNTASTIC_PLUGIN == 1
-    NeoBundle 'scrooloose/syntastic'
-endif
+    "list plugins
 
-if PERL_PLUGINS == 1
-    NeoBundle 'vim-perl/vim-perl'
-endif
+    if SYNTASTIC_PLUGIN == 1
+        NeoBundle 'scrooloose/syntastic'
+    endif
 
-if PYTHON_PLUGINS == 1
-    NeoBundle 'davidhalter/jedi-vim'
-    NeoBundle 'hynek/vim-python-pep8-indent'
-    NeoBundle 'mitechie/pyflakes-pathogen'
-endif
+    if PERL_PLUGINS == 1
+        NeoBundle 'vim-perl/vim-perl'
+    endif
 
-call neobundle#end()
+    if PYTHON_PLUGINS == 1
+        NeoBundle 'davidhalter/jedi-vim'
+        NeoBundle 'hynek/vim-python-pep8-indent'
+        NeoBundle 'mitechie/pyflakes-pathogen'
+    endif
 
-if firstRun == 1
-    echo "Installing Neobundle plugins"
-    echo ""
-    :NeoBundleInstall
-endif
+    call neobundle#end()
 
-NeoBundleCheck
+    if firstRun == 1
+        echo "Installing Neobundle plugins"
+        echo ""
+        :NeoBundleInstall
+    endif
+
+    NeoBundleCheck
+
+endif " ALLOW_PLUGINS check
 
 "
 "--------------------------------------
