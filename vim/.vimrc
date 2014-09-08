@@ -6,7 +6,9 @@ filetype off
 " Languages plugins
 "--------------------------------------
 
-let PYTHON_PLUGINS = 1
+let SYNTASTIC_PLUGIN = 0
+let PYTHON_PLUGINS = 0
+let PERL_PLUGINS = 0
 
 "--------------------------------------
 " Install NeoBundle if it is not exists
@@ -35,7 +37,13 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 
 "list plugins
 
-NeoBundle 'scrooloose/syntastic'
+if SYNTASTIC_PLUGIN == 1
+    NeoBundle 'scrooloose/syntastic'
+endif
+
+if PERL_PLUGINS == 1
+    NeoBundle 'vim-perl/vim-perl'
+endif
 
 if PYTHON_PLUGINS == 1
     NeoBundle 'davidhalter/jedi-vim'
@@ -168,18 +176,24 @@ if PYTHON_PLUGINS == 1
     " }}}
 endif
 
-" syntastic {{{
-let g:syntastic_auto_loc_list=1
-let g:syntastic_aggregate_errors = 1
+if SYNTASTIC_PLUGIN == 1
+    " syntastic {{{
+    let g:syntastic_auto_loc_list=1
+    let g:syntastic_aggregate_errors = 1
 
-if PYTHON_PLUGINS == 1
-    if filereadable(expand($HOME.'/.pylintrc'))
-        let g:syntastic_python_pylint_args = "--rcfile=~/.pylintrc" 
+    if PERL_PLUGINS == 1
+        let g:syntastic_enable_perl_checker = 1
+        let g:syntastic_perl_checkers = ['perl']
     endif
-endif
 
-"let g:syntastic_python_checkers = ['pylint']
-" }}}
+    if PYTHON_PLUGINS == 1
+        if filereadable(expand($HOME.'/.pylintrc'))
+            let g:syntastic_python_pylint_args = "--rcfile=~/.pylintrc" 
+        endif
+    endif
+    "let g:syntastic_python_checkers = ['pylint']
+    " }}}
+endif
 
 "--------------------------------------
 " Hot keys
