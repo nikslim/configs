@@ -207,10 +207,20 @@ endif
 " Auto commands
 "--------------------------------------
 
+" Remove blank symbols at the end of lines
 augroup misc
     autocmd!
     au BufWritePre * :%s/\s\+$//e
 augroup end
+
+"--------------------------------------
+" FileType settings
+"--------------------------------------
+
+" Enable autopep8 on `gq`
+if executable('autopep8')
+    au FileType python setlocal formatprg=autopep8\ -
+endif
 
 "--------------------------------------
 " Hot keys
