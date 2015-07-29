@@ -42,6 +42,8 @@ if ALLOW_PLUGINS == 1
     NeoBundleFetch 'Shougo/neobundle.vim'
 
     "list plugins
+    
+    NeoBundle 'tpope/vim-fugitive'
 
     if SYNTASTIC_PLUGIN == 1
         NeoBundle 'scrooloose/syntastic'
