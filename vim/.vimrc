@@ -7,9 +7,9 @@ filetype off
 "--------------------------------------
 
 let SYNTASTIC_PLUGIN = 0
-let PYTHON_PLUGINS = 1
+let PYTHON_PLUGINS = 0
 let PERL_PLUGINS = 0
-let CPP_PLUGINS = 1
+let CPP_PLUGINS = 0
 
 "--------------------------------------
 " Install NeoBundle if it is not exists
@@ -285,7 +285,7 @@ imap <F3> <Esc>:tabnew<CR>:Ex<cr>
 " copy to os clipboard Ctrl-C
 if has("unix")
   let s:uname = system("uname")
-  if s:uname == "Darwin"
+  if s:uname == "Darwin\n"
     vmap <C-c> :w !pbcopy<CR><CR>
   endif
 endif
