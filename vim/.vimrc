@@ -7,8 +7,9 @@ filetype off
 "--------------------------------------
 
 let SYNTASTIC_PLUGIN = 0
-let PYTHON_PLUGINS = 0
+let PYTHON_PLUGINS = 1
 let PERL_PLUGINS = 0
+let CPP_PLUGINS = 1
 
 "--------------------------------------
 " Install NeoBundle if it is not exists
@@ -42,11 +43,28 @@ if ALLOW_PLUGINS == 1
     NeoBundleFetch 'Shougo/neobundle.vim'
 
     "list plugins
-    
+
     NeoBundle 'tpope/vim-fugitive'
+
+    NeoBundle 'scrooloose/nerdtree'
+    NeoBundle 'Xuyuanp/nerdtree-git-plugin'
 
     if SYNTASTIC_PLUGIN == 1
         NeoBundle 'scrooloose/syntastic'
+    endif
+
+    if CPP_PLUGINS == 1
+        NeoBundle 'octol/vim-cpp-enhanced-highlight'
+        NeoBundle 'Valloric/YouCompleteMe', {
+            \ 'build'      : {
+                \ 'mac'     : './install.py --clang-completer',
+                \ 'unix'    : './install.py --clang-completer',
+                \ 'windows' : 'install.py --clang-completer',
+                \ 'cygwin'  : './install.py --clang-completer'
+                \ }
+            \ }
+        NeoBundle 'rdnetto/YCM-Generator'
+        NeoBundle 'rhysd/vim-clang-format'
     endif
 
     if PERL_PLUGINS == 1
@@ -89,7 +107,7 @@ set guioptions-=T
 set mousehide
 set title           "show file name in window title
 set novisualbell    "mute error bell
-set list           
+set list
 set listchars=tab:➝\ ,extends:#,nbsp:.
 set linebreak "wrap long lines at a character in 'breakat'
 set scrolljump=7 "Minimal number of lines to scroll when the cursor gets off the screen
@@ -98,13 +116,13 @@ set sidescroll=4 "The minimal number of columns to scroll horizontally
 set sidescrolloff=10 "The minimal number of screen columns to keep to the left and to the right of the cursor
 set showcmd  "show unfinished commands in status bar
 set completeopt=menu,preview "list of options for Insert mode completion
-set infercase 
+set infercase
 set ruler "show cursor
 set statusline=%<%f%h%m%r\ %l,%c\ %P
 set laststatus=2 "show always
 set cmdheight=1
 set ttyfast
-set shortmess=filnxtToOI 
+set shortmess=filnxtToOI
 set nostartofline
 set number
 
@@ -127,7 +145,7 @@ set incsearch          " increment search
 set ignorecase         " Ignore case in search patterns
 set smartcase          " Override the 'ignorecase' option if the search pattern contains upper case characters
 " stop highlighting on enter
-nnoremap <silent> <cr> :nohlsearch<cr><cr>  
+nnoremap <silent> <cr> :nohlsearch<cr><cr>
 
 " Matching characters
 set showmatch
@@ -168,6 +186,9 @@ set sessionoptions=curdir,buffers,tabpages
 " Colors
 color desert
 
+" show line for 80 symbols
+set colorcolumn=80
+
 "--------------------------------------
 " Plugins
 "--------------------------------------
@@ -180,10 +201,20 @@ if PYTHON_PLUGINS == 1
     let g:jedi#popup_on_dot = 0
     let g:jedi#auto_close_doc = 1
     let g:jedi#show_call_signatures = 1
-    let g:jedi#use_splits_not_buffers = "" " right
+    let g:jedi#use_splits_not_buffers = "right" " right
     let g:jedi#force_py_version = 2
     let g:jedi#completions_command = "<C-n>"
     " }}}
+endif
+
+if CPP_PLUGINS == 1
+    let g:cpp_class_scope_highlight = 1
+    "let g:cpp_experimental_template_highlight = 1
+
+    let g:ycm_confirm_extra_conf = 0
+    let g:ycm_autoclose_preview_window_after_insertion = 1
+    let g:clang_format#code_style = "google"
+    let g:clang_format#detect_style_file = 0
 endif
 
 if SYNTASTIC_PLUGIN == 1
@@ -196,9 +227,17 @@ if SYNTASTIC_PLUGIN == 1
         let g:syntastic_perl_checkers = ['perl']
     endif
 
+    if CPP_PLUGINS == 1
+        "let g:syntastic_c_check_header = 1
+        "let g:syntastic_cpp_remove_include_errors = 1
+        "let g:syntastic_cpp_checkers = ['clang-check', 'clang-tidy']
+        "let g:syntastic_cpp_compiler = 'clang++'
+        "let g:syntastic_cpp_compiler_options = '-std=c++11 -stdlib=libc++ -I. -Isrc'
+    endif
+
     if PYTHON_PLUGINS == 1
         if filereadable(expand($HOME.'/.pylintrc'))
-            let g:syntastic_python_pylint_args = "--rcfile=~/.pylintrc" 
+            let g:syntastic_python_pylint_args = "--rcfile=~/.pylintrc"
         endif
     endif
     "let g:syntastic_python_checkers = ['pylint']
@@ -224,12 +263,16 @@ if executable('autopep8')
     au FileType python setlocal formatprg=autopep8\ -
 endif
 
+autocmd FileType cpp,c setlocal shiftwidth=2 tabstop=2 softtabstop=2
+
 "--------------------------------------
 " Hot keys
 "--------------------------------------
 
 " replace under cursor
 nmap ; :s/\<<c-r>=expand("<cword>")<cr>\>/
+
+nnoremap ]d :YcmCompleter GoToDefinition<CR>
 
 " selection move
 vmap < <gv
@@ -238,3 +281,11 @@ vmap > >gv
 " open Ex in a new tab
 nmap <F3> :tabnew<CR>:Ex<cr>
 imap <F3> <Esc>:tabnew<CR>:Ex<cr>
+
+" copy to os clipboard Ctrl-C
+if has("unix")
+  let s:uname = system("uname")
+  if s:uname == "Darwin"
+    vmap <C-c> :w !pbcopy<CR><CR>
+  endif
+endif
