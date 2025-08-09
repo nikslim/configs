@@ -92,7 +92,6 @@ set shortmess=filnxtToOI
 set shortmess+=c
 set nostartofline
 set number
-set relativenumber
 
 set nowrap
 
