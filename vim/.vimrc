@@ -9,6 +9,7 @@ filetype off
 let PYTHON_PLUGINS = 0
 let PERL_PLUGINS = 0
 let CPP_PLUGINS = 0
+let GO_PLUGINS = 0
 
 "--------------------------------------
 " Install vim-plug if it is not exists
@@ -41,6 +42,10 @@ if PYTHON_PLUGINS == 1
     Plug 'davidhalter/jedi-vim'
     Plug 'hynek/vim-python-pep8-indent'
     Plug 'mitechie/pyflakes-pathogen'
+endif
+
+if GO_PLUGINS == 1
+    Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 endif
 
 call plug#end()
@@ -175,6 +180,10 @@ if PYTHON_PLUGINS == 1
     " }}}
 endif
 
+if GO_PLUGINS == 1
+    let g:go_fmt_command = "goimports"
+endif
+
 if CPP_PLUGINS == 1
     let g:cpp_class_scope_highlight = 1
     "let g:cpp_experimental_template_highlight = 1
@@ -199,6 +208,10 @@ if PYTHON_PLUGINS == 1
     endif
 endif
 
+if GO_PLUGINS == 1
+    let g:ale_linters['go'] = ['gofmt', 'golint']
+endif
+
 "--------------------------------------
 " Auto commands
 "--------------------------------------
@@ -219,6 +232,8 @@ if executable('autopep8')
 endif
 
 autocmd FileType cpp,c setlocal shiftwidth=2 tabstop=2 softtabstop=2
+
+autocmd FileType go setlocal noexpandtab tabstop=4 shiftwidth=4 softtabstop=4
 
 "--------------------------------------
 " Hot keys
