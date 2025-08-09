@@ -6,88 +6,54 @@ filetype off
 " Plugin groups
 "--------------------------------------
 
-let SYNTASTIC_PLUGIN = 0
 let PYTHON_PLUGINS = 0
 let PERL_PLUGINS = 0
 let CPP_PLUGINS = 0
 
 "--------------------------------------
-" Install NeoBundle if it is not exists
+" Install vim-plug if it is not exists
 "--------------------------------------
 
-let ALLOW_PLUGINS = 1
-if !executable('git')
-    let ALLOW_PLUGINS = 0
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-if ALLOW_PLUGINS == 1
-    let firstRun = 0
-    let neobundle_file = expand($HOME.'/.vim/bundle/neobundle.vim/README.md')
-    if !filereadable(neobundle_file)
-        echo "Installing NeoBundle.."
-        echo ""
-        silent !mkdir -p $HOME/.vim/bundle
-        silent !git clone https://github.com/Shougo/neobundle.vim $HOME/.vim/bundle/neobundle.vim
-        let firstRun = 1
-    endif
+call plug#begin('~/.vim/plugged')
 
-    "--------------------------------------
-    " NeoBundle configuration
-    "--------------------------------------
-    if has('vim_starting')
-        set runtimepath+=$HOME/.vim/bundle/neobundle.vim/
-    endif
+Plug 'tpope/vim-fugitive'
+Plug 'scrooloose/nerdtree'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'dense-analysis/ale'
 
-    call neobundle#begin(expand($HOME.'/.vim/bundle'))
+if CPP_PLUGINS == 1
+    Plug 'octol/vim-cpp-enhanced-highlight'
+    Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer' }
+    Plug 'rdnetto/YCM-Generator'
+    Plug 'rhysd/vim-clang-format'
+endif
 
-    NeoBundleFetch 'Shougo/neobundle.vim'
+if PERL_PLUGINS == 1
+    Plug 'vim-perl/vim-perl'
+endif
 
-    "list plugins
+if PYTHON_PLUGINS == 1
+    Plug 'davidhalter/jedi-vim'
+    Plug 'hynek/vim-python-pep8-indent'
+    Plug 'mitechie/pyflakes-pathogen'
+endif
 
-    NeoBundle 'tpope/vim-fugitive'
+call plug#end()
 
-    NeoBundle 'scrooloose/nerdtree'
-    NeoBundle 'Xuyuanp/nerdtree-git-plugin'
-
-    if SYNTASTIC_PLUGIN == 1
-        NeoBundle 'scrooloose/syntastic'
-    endif
-
-    if CPP_PLUGINS == 1
-        NeoBundle 'octol/vim-cpp-enhanced-highlight'
-        NeoBundle 'Valloric/YouCompleteMe', {
-            \ 'build'      : {
-                \ 'mac'     : './install.py --clang-completer',
-                \ 'unix'    : './install.py --clang-completer',
-                \ 'windows' : 'install.py --clang-completer',
-                \ 'cygwin'  : './install.py --clang-completer'
-                \ }
-            \ }
-        NeoBundle 'rdnetto/YCM-Generator'
-        NeoBundle 'rhysd/vim-clang-format'
-    endif
-
-    if PERL_PLUGINS == 1
-        NeoBundle 'vim-perl/vim-perl'
-    endif
-
-    if PYTHON_PLUGINS == 1
-        NeoBundle 'davidhalter/jedi-vim'
-        NeoBundle 'hynek/vim-python-pep8-indent'
-        NeoBundle 'mitechie/pyflakes-pathogen'
-    endif
-
-    call neobundle#end()
-
-    if firstRun == 1
-        echo "Installing Neobundle plugins"
-        echo ""
-        :NeoBundleInstall
-    endif
-
-    NeoBundleCheck
-
-endif " ALLOW_PLUGINS check
+" Ensure plugins are installed and up to date
+augroup plug_auto_update
+    autocmd!
+    autocmd VimEnter * if len(filter(values(g:plugs), {_, v -> !isdirectory(v.dir)})) |
+                \ PlugInstall --sync |
+                \ PlugUpdate |
+                \ PlugUpgrade |
+            \ endif
+augroup END
 
 "
 "--------------------------------------
@@ -115,7 +81,7 @@ set scrolloff=7 "Minimal number of screen lines to keep above and below the curs
 set sidescroll=4 "The minimal number of columns to scroll horizontally
 set sidescrolloff=10 "The minimal number of screen columns to keep to the left and to the right of the cursor
 set showcmd  "show unfinished commands in status bar
-set completeopt=menu,preview "list of options for Insert mode completion
+set completeopt=menuone,noinsert,noselect "list of options for Insert mode completion
 set infercase
 set ruler "show cursor
 set statusline=%<%f%h%m%r\ %l,%c\ %P
@@ -123,8 +89,10 @@ set laststatus=2 "show always
 set cmdheight=1
 set ttyfast
 set shortmess=filnxtToOI
+set shortmess+=c
 set nostartofline
 set number
+set relativenumber
 
 set nowrap
 
@@ -161,6 +129,7 @@ set encoding=utf-8           " Default encoding
 set fileencodings=utf-8,cp1251,koi8-r,cp866
 set termencoding=utf-8
 set fileformat=unix
+set termguicolors
 
 " Wild menu
 set wildmenu
@@ -202,7 +171,7 @@ if PYTHON_PLUGINS == 1
     let g:jedi#auto_close_doc = 1
     let g:jedi#show_call_signatures = 1
     let g:jedi#use_splits_not_buffers = "right" " right
-    let g:jedi#force_py_version = 2
+    let g:jedi#force_py_version = 3
     let g:jedi#completions_command = "<C-n>"
     " }}}
 endif
@@ -217,31 +186,18 @@ if CPP_PLUGINS == 1
     let g:clang_format#detect_style_file = 0
 endif
 
-if SYNTASTIC_PLUGIN == 1
-    " syntastic {{{
-    let g:syntastic_auto_loc_list=1
-    let g:syntastic_aggregate_errors = 1
 
-    if PERL_PLUGINS == 1
-        let g:syntastic_enable_perl_checker = 1
-        let g:syntastic_perl_checkers = ['perl']
-    endif
+" ALE configuration
+let g:ale_linters = {}
+if PERL_PLUGINS == 1
+    let g:ale_linters['perl'] = ['perl']
+endif
 
-    if CPP_PLUGINS == 1
-        "let g:syntastic_c_check_header = 1
-        "let g:syntastic_cpp_remove_include_errors = 1
-        "let g:syntastic_cpp_checkers = ['clang-check', 'clang-tidy']
-        "let g:syntastic_cpp_compiler = 'clang++'
-        "let g:syntastic_cpp_compiler_options = '-std=c++11 -stdlib=libc++ -I. -Isrc'
+if PYTHON_PLUGINS == 1
+    let g:ale_linters['python'] = ['pylint']
+    if filereadable(expand($HOME.'/.pylintrc'))
+        let g:ale_python_pylint_options = '--rcfile=' . expand('~/.pylintrc')
     endif
-
-    if PYTHON_PLUGINS == 1
-        if filereadable(expand($HOME.'/.pylintrc'))
-            let g:syntastic_python_pylint_args = "--rcfile=~/.pylintrc"
-        endif
-    endif
-    "let g:syntastic_python_checkers = ['pylint']
-    " }}}
 endif
 
 "--------------------------------------
